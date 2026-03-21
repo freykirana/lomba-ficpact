@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User Model
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  username  String     @unique
+  password  String
+  
+  // Profile
+  fullName  String?
+  avatar    String?
+  bio       String?
+  
+  // Progress
+  level     Int        @default(1)
+  xp        Int        @default(0)
+  coins     Int        @default(0)
+  
+  // Relations
+  submissions   Submission[]
+  dailyCases    DailyCaseSubmission[]
+  communityPosts CommunityPost[]
+  comments      Comment[]
+  reviews       Review[]
+  followers     Follow[] @relation("follower")
+  following     Follow[] @relation("following")
+  achievements  Achievement[]
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+// Authorization Token (for JWT refresh)
+model Token {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// Chapter/Problem Model
+model Chapter {
+  id        String   @id @default(cuid())
+  title     String
+  description String
+  content   String   // Problem description in markdown
+  difficulty String  // EASY, MEDIUM, HARD
+  category  String   // ALGORITHM, DATABASE, WEB, etc
+  
+  // Problem details
+  examples  String   // JSON format
+  testCases TestCase[]
+  
+  // Stats
+  totalAttempts Int @default(0)
+  totalSucceeds Int @default(0)
+  
+  submissions Submission[]
+  dailyCases DailyCase[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Test Case Model
+model TestCase {
+  id        String   @id @default(cuid())
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  input     String
+  expectedOutput String
+  
+  createdAt DateTime @default(now())
+}
+
+// User's Solution Submission
+model Submission {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  code      String
+  language  String   // javascript, python, java, cpp, etc
+  status    String   // PENDING, ACCEPTED, REJECTED, RUNTIME_ERROR
+  
+  // Results
+  passedTests Int @default(0)
+  totalTests  Int @default(0)
+  executionTime Float? // in milliseconds
+  
+  // Reward
+  xpEarned  Int @default(0)
+  coinsEarned Int @default(0)
+  isFirstSolve Boolean @default(false)
+  
+  reviews   Review[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Code Review
+model Review {
+  id        String   @id @default(cuid())
+  submissionId String
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  reviewerId String
+  reviewer  User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  
+  rating    Int      // 1-5 stars
+  comment   String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Daily Case Model
+model DailyCase {
+  id        String   @id @default(cuid())
+  date      DateTime @unique // Should be reset daily
+  
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id])
+  
+  xpReward  Int      @default(100)
+  coinReward Int     @default(50)
+  
+  submissions DailyCaseSubmission[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Daily Case Submission
+model DailyCaseSubmission {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  dailyCaseId String
+  dailyCase DailyCase @relation(fields: [dailyCaseId], references: [id], onDelete: Cascade)
+  
+  code      String
+  status    String   // PENDING, ACCEPTED, REJECTED
+  
+  xpEarned  Int
+  coinsEarned Int
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Coin Shop Item
+model ShopItem {
+  id        String   @id @default(cuid())
+  name      String
+  description String
+  price     Int      // coin price
+  icon      String   // URL to icon
+  category  String   // THEME, BADGE, POWER_UP, etc
+  
+  isActive  Boolean  @default(true)
+  
+  purchases Purchase[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Purchase History
+model Purchase {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  itemId    String
+  item      ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  quantity  Int      @default(1)
+  totalPrice Int
+  
+  createdAt DateTime @default(now())
+}
+
+// Community Post
+model CommunityPost {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  title     String
+  content   String   // markdown
+  category  String   // DISCUSSION, TUTORIAL, SHARING, HELP
+  tags      String   // comma-separated
+  
+  upvotes   Int      @default(0)
+  comments  Comment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Comment on Community Post
+model Comment {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  content   String
+  upvotes   Int      @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// User Achievement/Badge
+model Achievement {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  description String
+  icon      String   // URL to icon
+  criteria  String   // JSON with condition details
+  
+  users     User[] // Many-to-many with User
+  
+  createdAt DateTime @default(now())
+}
+
+// Follow System
+model Follow {
+  id          String @id @default(cuid())
+  followerId  String
+  follower    User   @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  
+  followingId String
+  following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([followerId, followingId])
+}
