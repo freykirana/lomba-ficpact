@@ -58,9 +58,16 @@ export async function POST(
       );
     }
 
-    // Simulate code execution
-    const passedTests = dailyCase.chapter.testCases.length;
-    const status = 'ACCEPTED';
+    // Parse question data to check answer
+    if (!dailyCase.questionData) {
+      return NextResponse.json({ error: 'Question data is missing' }, { status: 400 });
+    }
+    const qData = JSON.parse(dailyCase.questionData);
+    const isCorrect = parseInt(code) === qData.correctIndex;
+
+    const status = isCorrect ? 'ACCEPTED' : 'REJECTED';
+    const xpEarned = isCorrect ? dailyCase.xpReward : 0;
+    const coinsEarned = isCorrect ? dailyCase.coinReward : 0;
 
     const submission = await db.dailyCaseSubmission.create({
       data: {
@@ -68,28 +75,27 @@ export async function POST(
         dailyCaseId: params.id,
         code,
         status,
-        xpEarned: dailyCase.xpReward,
-        coinsEarned: dailyCase.coinReward
+        xpEarned,
+        coinsEarned
       }
     });
 
-    // Update user stats
-    await db.user.update({
-      where: { id: payload.id },
-      data: {
-        xp: { increment: dailyCase.xpReward },
-        coins: { increment: dailyCase.coinReward }
-      }
-    });
+    if (isCorrect) {
+      await db.user.update({
+        where: { id: payload.id },
+        data: {
+          xp: { increment: xpEarned },
+          coins: { increment: coinsEarned }
+        }
+      });
+    }
 
     return NextResponse.json(
       {
-        message: 'Daily case submitted successfully',
+        message: isCorrect ? 'Great job! Answer is correct.' : 'Incorrect answer! Try again tomorrow.',
         submission,
-        rewards: {
-          xp: dailyCase.xpReward,
-          coins: dailyCase.coinReward
-        }
+        rewards: { xp: xpEarned, coins: coinsEarned },
+        isCorrect
       },
       { status: 201 }
     );

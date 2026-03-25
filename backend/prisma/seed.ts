@@ -54,91 +54,71 @@ async function main() {
       bio: 'Expert problem solver',
       level: 7,
       xp: 6500,
-      coins: 2000
+      coins: 100000
     }
   });
 
-  // Create sample chapters
-  const chapter1 = await prisma.chapter.create({
-    data: {
-      title: 'Two Sum',
-      description: 'Find two numbers that add up to a target',
-      content: `Given an array of integers nums and an integer target, return the indices of the two numbers such that they add up to target.
-
-You may assume that each input has exactly one solution, and you may not use the same element twice.
-
-Example:
-Input: nums = [2,7,11,15], target = 9
-Output: [0,1]
-Explanation: nums[0] + nums[1] == 9, so we return [0, 1].`,
-      difficulty: 'EASY',
-      category: 'ALGORITHM',
-      examples: JSON.stringify([
-        {
-          input: 'nums = [2,7,11,15], target = 9',
-          output: '[0,1]'
-        }
-      ]),
-      totalAttempts: 10,
-      totalSucceeds: 7
-    }
-  });
-
-  const chapter2 = await prisma.chapter.create({
-    data: {
-      title: 'Longest Substring Without Repeating Characters',
-      description: 'Find the longest substring without repeating characters',
-      content: `Given a string s, find the length of the longest substring without repeating characters.
-
-Example:
-Input: s = "abcabcbb"
-Output: 3
-Explanation: The answer is "abc", with the length of 3.`,
-      difficulty: 'MEDIUM',
-      category: 'ALGORITHM',
-      examples: JSON.stringify([
-        {
-          input: 's = "abcabcbb"',
-          output: '3'
-        }
-      ]),
-      totalAttempts: 8,
-      totalSucceeds: 5
-    }
-  });
-
-  const chapter3 = await prisma.chapter.create({
-    data: {
-      title: 'Median of Two Sorted Arrays',
-      description: 'Find the median of two sorted arrays',
-      content: `Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.
-
-The overall run time complexity should be O(log (m+n)).`,
-      difficulty: 'HARD',
-      category: 'ALGORITHM',
-      examples: JSON.stringify([
-        {
-          input: 'nums1 = [1,3], nums2 = [2]',
-          output: '2.0'
-        }
-      ]),
-      totalAttempts: 5,
-      totalSucceeds: 2
-    }
-  });
-
-  // Create test cases for chapter1
-  await prisma.testCase.createMany({
+  // Create chapters based on grade levels
+  await prisma.chapter.createMany({
     data: [
+      // KELAS 10
       {
-        chapterId: chapter1.id,
-        input: '[2,7,11,15], 9',
-        expectedOutput: '[0,1]'
+        title: 'Pertidaksamaan Linear',
+        description: 'Materi pembahasan dan kuis tentang pertidaksamaan (Linear, Kuadrat, Mutlak, dll)',
+        content: "Silakan klik tombol Let's Start untuk mempelajari materi tentang Pertidaksamaan Linear dan mengerjakan soal kuisnya.",
+        difficulty: 'MEDIUM',
+        category: 'KELAS_10',
+        examples: '[]'
       },
       {
-        chapterId: chapter1.id,
-        input: '[3,2,4], 6',
-        expectedOutput: '[1,2]'
+        title: 'Sistem Persamaan Linear',
+        description: 'Materi pembahasan dan kuis khusus tentang SPLDV',
+        content: "Silakan klik tombol Let's Start untuk mempelajari materi tentang SPLDV dan mengerjakan soal kuisnya.",
+        difficulty: 'MEDIUM',
+        category: 'KELAS_10',
+        examples: '[]'
+      },
+      {
+        title: 'Persamaan Garis Lurus',
+        description: 'Materi pembahasan tentang Persamaan Garis Lurus dan Sifat Kemiringan',
+        content: "Silakan klik tombol Let's Start untuk mempelajari materi Geometri Analitik PGL dan mengerjakan soal kuisnya.",
+        difficulty: 'HARD',
+        category: 'KELAS_10',
+        examples: '[]'
+      },
+      // KELAS 11
+      {
+        title: 'Logika Matematika',
+        description: 'Pernyataan, Negasi, Konjungsi, Disjungsi, Implikasi, Biimplikasi, dan Penarikan Kesimpulan',
+        content: "Silakan klik tombol Let's Start untuk mempelajari Logika Matematika dan mengerjakan soal kuisnya.",
+        difficulty: 'MEDIUM',
+        category: 'KELAS_11',
+        examples: '[]'
+      },
+      {
+        title: 'Induksi Matematika',
+        description: 'Prinsip Induksi Matematika dan Penerapannya pada Barisan dan Pembagian',
+        content: "Silakan klik tombol Let's Start untuk mempelajari Induksi Matematika dan mengerjakan soal kuisnya.",
+        difficulty: 'HARD',
+        category: 'KELAS_11',
+        examples: '[]'
+      },
+      // KELAS 12
+      {
+        title: 'Geometri Bidang Datar',
+        description: 'Sifat titik, garis, dan bidang, Kesebangunan, Kekongruenan serta Luas Bangun Datar',
+        content: "Silakan klik tombol Let's Start untuk mempelajari Geometri Bidang Datar dan mengerjakan soal kuisnya.",
+        difficulty: 'MEDIUM',
+        category: 'KELAS_12',
+        examples: '[]'
+      },
+      {
+        title: 'Geometri Bidang Ruang',
+        description: 'Jarak dalam Ruang, Sudut dalam Ruang, Luas Permukaan dan Volume Bangun Ruang',
+        content: "Silakan klik tombol Let's Start untuk mempelajari Geometri Bidang Ruang dan mengerjakan soal kuisnya.",
+        difficulty: 'HARD',
+        category: 'KELAS_12',
+        examples: '[]'
       }
     ]
   });
@@ -147,25 +127,53 @@ The overall run time complexity should be O(log (m+n)).`,
   await prisma.shopItem.createMany({
     data: [
       {
-        name: 'Dark Theme Badge',
-        description: 'Unlock dark theme for your profile',
-        price: 100,
+        name: 'Dark Theme',
+        description: 'Unlock stunning dark mode interface.',
+        price: 1000,
         icon: '🌙',
         category: 'THEME'
       },
       {
-        name: 'Gold Star Badge',
-        description: 'Show off your achievement with a gold star',
-        price: 50,
-        icon: '⭐',
+        name: 'Bronze Star',
+        description: 'Beginner achiever badge.',
+        price: 100,
+        icon: '/badges/bronze_star.png',
         category: 'BADGE'
       },
       {
-        name: 'XP Multiplier (24h)',
-        description: 'Double your XP for 24 hours',
+        name: 'Silver Star',
+        description: 'Intermediate achiever badge.',
         price: 200,
-        icon: '2️⃣',
-        category: 'POWER_UP'
+        icon: '/badges/silver_star.png',
+        category: 'BADGE'
+      },
+      {
+        name: 'Gold Star',
+        description: 'Advanced achiever badge.',
+        price: 500,
+        icon: '/badges/gold_star.png',
+        category: 'BADGE'
+      },
+      {
+        name: 'Diamond Star',
+        description: 'Elite achiever badge.',
+        price: 1000,
+        icon: '/badges/diamond_star.png',
+        category: 'BADGE'
+      },
+      {
+        name: 'Ruby Star',
+        description: 'Supreme achiever badge.',
+        price: 2000,
+        icon: '/badges/ruby_star.png',
+        category: 'BADGE'
+      },
+      {
+        name: 'Grand Master',
+        description: 'Special Title displayed next to your name.',
+        price: 5000,
+        icon: '👑',
+        category: 'TITLE'
       }
     ]
   });

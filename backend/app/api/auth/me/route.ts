@@ -34,6 +34,13 @@ export async function GET(req: NextRequest) {
         level: true,
         xp: true,
         coins: true,
+        darkThemeEnabled: true,
+        activeTitle: true,
+        purchases: {
+          include: {
+            item: true
+          }
+        },
         createdAt: true
       }
     });
